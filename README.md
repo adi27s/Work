@@ -1,2 +1,2 @@
-# Git-ommands
+# Git-Commands
 My cmds
