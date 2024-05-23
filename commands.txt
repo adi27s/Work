@@ -1,0 +1,17 @@
+1. Git stash commands
+  git stash push --include-untracked -m "Stashing untracked files and changes" // before staging
+  // checkout to a new branch
+  git stash list
+  git stash pop
+
+2. Git fetch and rebase
+  git fetch upstream [OR] git fetch origin
+  git rebase upstream/main [OR] git rebase origin/main
+
+3. Git push
+  git push <remote> <branch>
+
+4. 
+
+
+  
