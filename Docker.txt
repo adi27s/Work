@@ -1,0 +1,7 @@
+1. View list of docker images available locally
+    docker images
+2. To run a docker image in container 
+    docker run -it <docker-image> /bin/bash
+    docker run -it <docker-image> /bin/sh
+    exit
+3. 
