@@ -12,8 +12,16 @@
   git push <remote> <branch>
 
 4. Git patch
+      Creating git patch
+        - Commit range: git format-patch <start-commit>..<end-commit> || start commit is exclusive , end is inclusive
+          ex: git format-patch HEAD~3..HEAD || last 3 commits
+        - Previous commit: git format-patch -1 HEAD
+        - Uncommitted changes: git diff > my-changes.patch
+      Apply git patch
+        - git apply <patch-file>
 
-5. Undo stageing 
+5. Undo staging
+    git reset
 
 
   
