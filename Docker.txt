@@ -3,7 +3,7 @@
 2. To run a docker image in container 
     docker run -it <docker-image> /bin/bash
     docker run --platform linux/amd64 -it -v $(pwd):/home/vdp/ <image> /bin/bash
-            Uses the -v option to mount a volume. $(pwd):/home/vdp/ mounts the current directory on the host machine (denoted by $(pwd)) to the /home/vdp/ directory inside              the container. This allows you to share files between the host and the container.
+            Uses the -v option to mount a volume. $(pwd):/home/vdp/ mounts the current directory on the host machine (denoted by $(pwd)) to the /home/vdp/ directory inside the container. This allows you to share files between the host and the container.
     docker run -it <docker-image> /bin/sh
     exit
 3. 
