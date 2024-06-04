@@ -2,6 +2,7 @@
     docker images
 2. To run a docker image in container 
     docker run -it <docker-image> /bin/bash
+    docker run --platform linux/amd64 -it -v $(pwd):/home/vdp/ <image> /bin/bash
     docker run -it <docker-image> /bin/sh
     exit
 3. 
