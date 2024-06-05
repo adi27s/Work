@@ -24,4 +24,64 @@
     git reset
 
 
-  
+
+
+
+
+
+
+
+
+#include <stdio.h>
+
+struct node{
+    int val;
+    struct node *adr;
+};
+
+typedef struct head_node{
+    char* str;
+    struct node *node_t;
+}head_t;
+
+// Function definitions
+void create_ll(void){
+    head_t *head_ptr = (head_t *)malloc(sizeof(head_t));
+    printf("Name the linked list\n");
+    scanf("%s",head_ptr->str);
+    head_ptr->node_t=NULL;
+    printf("New linkedlist initialized successfully !\n");
+    assign_value(0,head_ptr,0);
+    return head_ptr;
+}
+
+assign_value(int no_of_elements=0,head_t *head_node,int start_index){
+    int i=0;
+    struct node *node=head_node->node_t;
+    if (no_of_elements == 0){
+        // Initialization of a linked list
+        int value;
+        scanf("%d",&value);
+        while(value != ){
+            
+        }
+    }
+    else{
+        for(i=0;i<start_index;i++){
+        
+        }   
+    }
+}
+
+
+
+int main()
+{
+    printf("Enter your choice :\n1. Create a new linked list ");
+
+
+
+
+    return 0;
+}
+
