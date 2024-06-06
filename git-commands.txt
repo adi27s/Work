@@ -148,10 +148,46 @@ void add_at_the_end(head_t *head_node){
 
 // Main Code
 int main() {
-    printf("Enter your choice:\n1. Create a new linked list\n2. Print a linked list (Enter name of the linked list)\n");
-    head_t *head = create_ll();
-    assign_value(head,8);
-    
-
+    head_t *head = NULL;
+    int x,index;
+    while(1){
+        printf("Enter your choice:\n1. Create a new linked list\n2. Print a linked list (Enter name of the linked list)\n3. Add an element at the beginning of the linkedlist.\n4. Add an element at the end.\n5. Add an element at an index\n6. Delete the linkedlist\n");
+        scanf("%d",&x);
+        switch(x){
+            case 1: head=create_ll();
+            break;
+            
+            case 2: print_ll(head);
+            break;
+            
+            case 3: add_at_the_beginning(head);
+            break;
+            
+            case 4: add_at_the_end(head);
+            break;
+            
+            case 5: printf("Enter the index\n");
+            scanf("%d",&index);
+            assign_value(head,index);
+            break;
+            
+            case 6: {
+                struct node *current = head->node_t;
+                struct node *next;
+                
+                // Free all nodes in the linked list
+                while (current != NULL) {
+                    next = current->adr;
+                    free(current);
+                    current = next;
+                }
+                
+                // Free the head node
+                free(head);
+                head = NULL;
+                printf("Linked list and head address freed (Verify by choosing 2nd option)\n");
+            }
+        }
+    }
     return 0;
 }
