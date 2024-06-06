@@ -33,54 +33,71 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-struct node{
+struct node {
     int val;
     struct node *adr;
 };
 
-typedef struct head_node{
-    char* str;
+typedef struct head_node {
+    char str[100];
     struct node *node_t;
-}head_t;
+} head_t;
 
-// Function definitions
-void create_ll(void){
+// Function prototypes
+void assign_value(int, head_t *, int);
+void create_ll(void);
+void print_ll(head_t *);
+
+void create_ll(void) {
     head_t *head_ptr = (head_t *)malloc(sizeof(head_t));
-    printf("Name the linked list\n");
-    scanf("%s",head_ptr->str);
-    head_ptr->node_t=NULL;
-    printf("New linkedlist initialized successfully !\n");
-    assign_value(0,head_ptr,0);
-    return head_ptr;
+    printf("Name the linked list: ");
+    scanf("%99s", head_ptr->str);
+    head_ptr->node_t = NULL;
+    printf("New linked list initialized successfully!\n");
+    assign_value(0, head_ptr, 0);
 }
 
-assign_value(int no_of_elements=0,head_t *head_node,int start_index){
-    int i=0;
-    struct node *node=head_node->node_t;
-    if (no_of_elements == 0){
-        // Initialization of a linked list
-        int value;
-        scanf("%d",&value);
-        while(value != ){
-            
+void print_ll(head_t *head_node) {
+    printf("Printing linked list %s\n", head_node->str);
+    struct node *node_t = head_node->node_t;
+    while (node_t != NULL) {
+        printf("%d\n", node_t->val);
+        node_t = node_t->adr;
+    }
+}
+
+void assign_value(int no_of_elements, head_t *head_node, int start_index) {
+    int num;
+    struct node *node_t = head_node->node_t;
+    if (no_of_elements == 0) {
+        // Initialization of a new linked list
+        printf("Enter numbers to add to the linked list (non-numeric input to stop):\n");
+        while (scanf("%d", &num) == 1) {
+            if (head_node->node_t == NULL) {
+                head_node->node_t = (struct node *)malloc(sizeof(struct node));
+                node_t = head_node->node_t;
+            } else {
+                node_t->adr = (struct node *)malloc(sizeof(struct node));
+                node_t = node_t->adr;
+            }
+            node_t->val = num;
+            node_t->adr = NULL;
+            printf("Added: %d\n", node_t->val);
         }
+        while (getchar() != '\n'); // Clear the input buffer
+    } else {
+        // Appending data to an existing linked list (at an index)
+        printf("INCOMPLETE ELSE\n");
     }
-    else{
-        for(i=0;i<start_index;i++){
-        
-        }   
-    }
+    print_ll(head_node);
 }
 
-
-
-int main()
-{
-    printf("Enter your choice :\n1. Create a new linked list ");
-
-
-
+int main() {
+    printf("Enter your choice:\n1. Create a new linked list\n2. Print a linked list (Enter name of the linked list)\n");
+    create_ll();
 
     return 0;
 }
