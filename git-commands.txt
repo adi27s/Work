@@ -74,7 +74,7 @@ void print_ll(head_t *head_node) {
 void assign_value(int no_of_elements, head_t *head_node, int start_index) {
     int num;
     struct node *node_t = head_node->node_t;
-    if (no_of_elements == 0) {
+    if (head_node->node_t == NULL) {
         // Initialization of a new linked list
         printf("Enter numbers to add to the linked list (non-numeric input to stop):\n");
         while (scanf("%d", &num) == 1) {
@@ -89,9 +89,29 @@ void assign_value(int no_of_elements, head_t *head_node, int start_index) {
             node_t->adr = NULL;
             printf("Added: %d\n", node_t->val);
         }
-        while (getchar() != '\n'); // Clear the input buffer
+        while (getchar() != '\n'); // Clear the input buffer incases like 99a88, where 99 is accepted but not 'a'
     } else {
         // Appending data to an existing linked list (at an index)
+        int i=0;
+        if (start_index == 0){
+            add_at_the_beginning(head_t *head_node);
+        }
+        else{
+            for(i=1;i<start_index;i++){
+                node_t=node_t->adr;    
+            }
+            if(node_t->adr == NULL){
+                add_at_the_end(head_t *head_node);
+            }
+            else{
+                struct node *temp_node=(struct node *)malloc(sizeof(struct node));
+                temp_node->adr=node_t->adr;
+                printf("Enter the value\n");
+                scanf("%d",&num);
+                node_t->val=num;
+                node_t->adr=&temp_node;   
+            }
+        }
         printf("INCOMPLETE ELSE\n");
     }
     print_ll(head_node);
@@ -105,4 +125,3 @@ int main() {
 
     return 0;
 }
-
