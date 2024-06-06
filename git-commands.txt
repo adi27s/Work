@@ -99,7 +99,10 @@ void assign_value(head_t *head_node, int start_index) {
         }
         else{
             for(i=1;i<start_index;i++){
-                node_t=node_t->adr;    
+                node_t=node_t->adr;
+                if(node_t->adr==NULL){
+                    break;
+                }
             }
             if(node_t->adr == NULL){
                 add_at_the_end(head_node);
@@ -147,7 +150,7 @@ void add_at_the_end(head_t *head_node){
 int main() {
     printf("Enter your choice:\n1. Create a new linked list\n2. Print a linked list (Enter name of the linked list)\n");
     head_t *head = create_ll();
-    assign_value(head,3);
+    assign_value(head,8);
     
 
     return 0;
