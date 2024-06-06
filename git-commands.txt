@@ -51,6 +51,8 @@ void assign_value(int, head_t *, int);
 void create_ll(void);
 void print_ll(head_t *);
 
+
+// Function definitions
 void create_ll(void) {
     head_t *head_ptr = (head_t *)malloc(sizeof(head_t));
     printf("Name the linked list: ");
@@ -95,6 +97,8 @@ void assign_value(int no_of_elements, head_t *head_node, int start_index) {
     print_ll(head_node);
 }
 
+
+// Main Code
 int main() {
     printf("Enter your choice:\n1. Create a new linked list\n2. Print a linked list (Enter name of the linked list)\n");
     create_ll();
