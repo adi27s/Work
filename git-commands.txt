@@ -22,3 +22,14 @@
 
 5. Undo staging
     git reset
+
+6. Push
+  cp -r component/ component_bakup
+  git restore component
+  git diff tools/scripts/cross_compile_thirdparty.sh
+  git restore tools/scripts/
+  git add component/app/m--/face_recog/face_recog.c
+  git commit -m "changes in api - MattojsonArray"
+  git push origin face_recog
+
+  
