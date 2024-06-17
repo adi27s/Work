@@ -1,12 +1,3 @@
-/* Record file to SD Card
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -134,52 +125,6 @@ void listen_from_mic(void)
     ESP_LOGI(TAG, "[3.2] Create i2s stream to read audio data from codec chip");
     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
     i2s_cfg.type = AUDIO_STREAM_READER;
-#if defined (CONFIG_CHOICE_WAV_ENCODER)
-#elif defined (CONFIG_CHOICE_OPUS_ENCODER)
-    sample_rate = SAMPLE_RATE;
-    if (CHANNEL == 1) {
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-        channel_format = AUDIO_DATA_FORMNAT_ONLY_RIGHT;
-#else
-        channel_format = AUDIO_DATA_FORMNAT_ONLY_LEFT;
-#endif
-    } else {
-        channel_format = AUDIO_DATA_FORMNAT_RIGHT_LEFT;
-    }
-#elif defined (CONFIG_CHOICE_AAC_ENCODER)
-    sample_rate = SAMPLE_RATE;
-    if (CHANNEL == 1) {
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-        channel_format = AUDIO_DATA_FORMNAT_ONLY_RIGHT;
-#else
-        channel_format = AUDIO_DATA_FORMNAT_ONLY_LEFT;
-#endif
-    } else {
-        channel_format = AUDIO_DATA_FORMNAT_RIGHT_LEFT;
-    }
-#elif defined (CONFIG_CHOICE_AMR_NB_ENCODER)
-    sample_rate = 8000;
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-    channel_format = AUDIO_DATA_FORMNAT_ONLY_RIGHT;
-#else
-    channel_format = AUDIO_DATA_FORMNAT_ONLY_LEFT;
-#endif
-#elif defined (CONFIG_CHOICE_AMR_WB_ENCODER)
-    sample_rate = 16000;
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-    channel_format = AUDIO_DATA_FORMNAT_ONLY_RIGHT;
-#else
-    channel_format = AUDIO_DATA_FORMNAT_ONLY_LEFT;
-#endif
-#endif
-
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-    i2s_cfg.i2s_port = 1;
-#if (ESP_IDF_VERSION <= ESP_IDF_VERSION_VAL(4, 0, 0))
-    channel_format = AUDIO_DATA_FORMNAT_ONLY_RIGHT;
-#endif
-
-#endif
 
     audio_data_format_set(&i2s_cfg, channel_format);
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
@@ -190,104 +135,18 @@ void listen_from_mic(void)
     i2s_stream_reader = i2s_stream_init(&i2s_cfg);
 
     ESP_LOGI(TAG, "[3.3] Create audio encoder to handle data");
-#if defined CONFIG_CHOICE_WAV_ENCODER
     wav_encoder_cfg_t wav_cfg = DEFAULT_WAV_ENCODER_CONFIG();
     audio_encoder = wav_encoder_init(&wav_cfg);
-#elif defined (CONFIG_CHOICE_OPUS_ENCODER)
-    opus_encoder_cfg_t opus_cfg = DEFAULT_OPUS_ENCODER_CONFIG();
-    opus_cfg.sample_rate        = SAMPLE_RATE;
-    opus_cfg.channel            = CHANNEL;
-    opus_cfg.bitrate            = BIT_RATE;
-    opus_cfg.complexity         = COMPLEXITY;
-#if defined (CONFIG_ESP_LYRAT_MINI_V1_1_BOARD)
-    rsp_filter_cfg_t rsp_file_cfg = DEFAULT_RESAMPLE_FILTER_CONFIG();
-    rsp_file_cfg.src_rate = SAMPLE_RATE;
-    rsp_file_cfg.src_ch = 2;
-    rsp_file_cfg.dest_rate = SAMPLE_RATE;
-    rsp_file_cfg.dest_ch = 1;
-    rsp_file_cfg.complexity = 0;
-    rsp_file_cfg.down_ch_idx = 1;
-    audio_element_handle_t resample = rsp_filter_init(&rsp_file_cfg);
-    if (opus_cfg.channel == 2) {
-        ESP_LOGE(TAG, "esp_lyrat_mini only support one channel");
-        return;
-    }
-#endif
-    audio_encoder = encoder_opus_init(&opus_cfg);
-#elif defined (CONFIG_CHOICE_AAC_ENCODER)
-    aac_encoder_cfg_t aac_cfg = DEFAULT_AAC_ENCODER_CONFIG();
-    aac_cfg.sample_rate        = SAMPLE_RATE;
-    aac_cfg.channel            = CHANNEL;
-    aac_cfg.bitrate            = BIT_RATE;
-#if defined (CONFIG_ESP_LYRAT_MINI_V1_1_BOARD)
-    rsp_filter_cfg_t rsp_file_cfg = DEFAULT_RESAMPLE_FILTER_CONFIG();
-    rsp_file_cfg.src_rate = SAMPLE_RATE;
-    rsp_file_cfg.src_ch = 2;
-    rsp_file_cfg.dest_rate = SAMPLE_RATE;
-    rsp_file_cfg.dest_ch = 1;
-    rsp_file_cfg.complexity = 0;
-    rsp_file_cfg.down_ch_idx = 1;
-    audio_element_handle_t resample = rsp_filter_init(&rsp_file_cfg);
-    if (aac_cfg.channel == 2) {
-        ESP_LOGE(TAG, "esp_lyrat_mini only support one channel");
-        return;
-    }
-#endif
-    audio_encoder = aac_encoder_init(&aac_cfg);
-#elif defined CONFIG_CHOICE_AMR_WB_ENCODER
-    amrwb_encoder_cfg_t amrwb_enc_cfg = DEFAULT_AMRWB_ENCODER_CONFIG();
-    audio_encoder = amrwb_encoder_init(&amrwb_enc_cfg);
-#elif defined CONFIG_CHOICE_AMR_NB_ENCODER
-    amrnb_encoder_cfg_t amrnb_enc_cfg = DEFAULT_AMRNB_ENCODER_CONFIG();
-    audio_encoder = amrnb_encoder_init(&amrnb_enc_cfg);
-#endif
 
     ESP_LOGI(TAG, "[3.4] Register all elements to audio pipeline");
     audio_pipeline_register(pipeline, i2s_stream_reader, "i2s");
 
-#if defined (CONFIG_CHOICE_WAV_ENCODER)
     audio_pipeline_register(pipeline, audio_encoder, "wav");
-#elif defined (CONFIG_CHOICE_OPUS_ENCODER)
-    audio_pipeline_register(pipeline, audio_encoder, "opus");
-#elif defined (CONFIG_CHOICE_AAC_ENCODER)
-    audio_pipeline_register(pipeline, audio_encoder, "aac");
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-    audio_pipeline_register(pipeline, resample, "res");
-#endif
-#elif defined (CONFIG_CHOICE_AMR_WB_ENCODER)
-    audio_pipeline_register(pipeline, audio_encoder, "Wamr");
-#elif defined (CONFIG_CHOICE_AMR_NB_ENCODER)
-    audio_pipeline_register(pipeline, audio_encoder, "amr");
-#endif
     audio_pipeline_register(pipeline, fatfs_stream_writer, "file");
 
     ESP_LOGI(TAG, "[3.5] Link it together [codec_chip]-->i2s_stream-->audio_encoder-->fatfs_stream-->[sdcard]");
-#if defined (CONFIG_CHOICE_WAV_ENCODER)
     const char *link_tag[3] = {"i2s", "wav", "file"};
     audio_pipeline_link(pipeline, &link_tag[0], 3);
-#elif defined (CONFIG_CHOICE_OPUS_ENCODER)
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-    const char *link_tag[4] = {"i2s", "res", "opus", "file"};
-    audio_pipeline_link(pipeline, &link_tag[0], 4);
-#else
-    const char *link_tag[3] = {"i2s", "opus", "file"};
-    audio_pipeline_link(pipeline, &link_tag[0], 3);
-#endif
-#elif defined (CONFIG_CHOICE_AAC_ENCODER)
-#if defined CONFIG_ESP_LYRAT_MINI_V1_1_BOARD
-    const char *link_tag[4] = {"i2s", "res", "aac", "file"};
-    audio_pipeline_link(pipeline, &link_tag[0], 4);
-#else
-    const char *link_tag[3] = {"i2s", "aac", "file"};
-    audio_pipeline_link(pipeline, &link_tag[0], 3);
-#endif
-#elif defined (CONFIG_CHOICE_AMR_WB_ENCODER)
-    const char *link_tag[3] = {"i2s", "Wamr", "file"};
-    audio_pipeline_link(pipeline, &link_tag[0], 3);
-#elif defined (CONFIG_CHOICE_AMR_NB_ENCODER)
-    const char *link_tag[3] = {"i2s", "amr", "file"};
-    audio_pipeline_link(pipeline, &link_tag[0], 3);
-#endif
     ESP_LOGI(TAG, "[3.6] Set music info to fatfs");
     audio_element_info_t music_info = {0};
     audio_element_getinfo(i2s_stream_reader, &music_info);
@@ -296,17 +155,7 @@ void listen_from_mic(void)
     audio_element_setinfo(fatfs_stream_writer, &music_info);
 
     ESP_LOGI(TAG, "[3.7] Set up  uri");
-#if defined (CONFIG_CHOICE_WAV_ENCODER)
     audio_element_set_uri(fatfs_stream_writer, "/sdcard/rec.wav");
-#elif defined (CONFIG_CHOICE_OPUS_ENCODER)
-    audio_element_set_uri(fatfs_stream_writer, "/sdcard/rec.opus");
-#elif defined (CONFIG_CHOICE_AAC_ENCODER)
-    audio_element_set_uri(fatfs_stream_writer, "/sdcard/rec.aac");
-#elif defined (CONFIG_CHOICE_AMR_WB_ENCODER)
-    audio_element_set_uri(fatfs_stream_writer, "/sdcard/rec.Wamr");
-#elif defined (CONFIG_CHOICE_AMR_NB_ENCODER)
-    audio_element_set_uri(fatfs_stream_writer, "/sdcard/rec.amr");
-#endif
     
     ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
     audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
@@ -369,9 +218,6 @@ void listen_from_mic(void)
     audio_pipeline_deinit(pipeline);
     audio_element_deinit(fatfs_stream_writer);
     audio_element_deinit(i2s_stream_reader);
-#if defined (CONFIG_CHOICE_OPUS_ENCODER) && defined (CONFIG_CHOICE_AAC_ENCODER) && defined (CONFIG_ESP_LYRAT_MINI_V1_1_BOARD)
-    audio_element_deinit(resample);
-#endif
     audio_element_deinit(audio_encoder);
     esp_periph_set_destroy(set);
 }
@@ -415,40 +261,6 @@ void send_to_speaker(void){
     wav_decoder_cfg_t  wav_dec_cfg  = DEFAULT_WAV_DECODER_CONFIG();
     music_decoder = wav_decoder_init(&wav_dec_cfg);
 
-// #ifdef CONFIG_AUDIO_SUPPORT_MP3_DECODER
-//     ESP_LOGI(TAG, "[3.3] Create mp3 decoder");
-//     mp3_decoder_cfg_t mp3_cfg = DEFAULT_MP3_DECODER_CONFIG();
-//     music_decoder = mp3_decoder_init(&mp3_cfg);
-// #elif (CONFIG_AUDIO_SUPPORT_AMRNB_DECODER ||    
-//         CONFIG_AUDIO_SUPPORT_AMRWB_DECODER)
-//     ESP_LOGI(TAG, "[3.3] Create amr decoder");
-//     amr_decoder_cfg_t  amr_dec_cfg  = DEFAULT_AMR_DECODER_CONFIG();
-//     music_decoder = amr_decoder_init(&amr_dec_cfg);
-// #elif CONFIG_AUDIO_SUPPORT_OPUS_DECODER
-//     ESP_LOGI(TAG, "[3.3] Create opus decoder");
-//     opus_decoder_cfg_t opus_dec_cfg = DEFAULT_OPUS_DECODER_CONFIG();
-//     music_decoder = decoder_opus_init(&opus_dec_cfg);
-// #elif CONFIG_AUDIO_SUPPORT_OGG_DECODER
-//     ESP_LOGI(TAG, "[3.3] Create ogg decoder");
-//     ogg_decoder_cfg_t  ogg_dec_cfg  = DEFAULT_OGG_DECODER_CONFIG();
-//     music_decoder = ogg_decoder_init(&ogg_dec_cfg);
-// #elif CONFIG_AUDIO_SUPPORT_FLAC_DECODER
-//     ESP_LOGI(TAG, "[3.3] Create flac decoder");
-//     flac_decoder_cfg_t flac_dec_cfg = DEFAULT_FLAC_DECODER_CONFIG();
-//     music_decoder = flac_decoder_init(&flac_dec_cfg);
-// #elif CONFIG_AUDIO_SUPPORT_WAV_DECODER
-//     ESP_LOGI(TAG, "[3.3] Create wav decoder");
-//     wav_decoder_cfg_t  wav_dec_cfg  = DEFAULT_WAV_DECODER_CONFIG();
-//     music_decoder = wav_decoder_init(&wav_dec_cfg);
-// #elif ((CONFIG_AUDIO_SUPPORT_AAC_DECODER) ||    
-//         (CONFIG_AUDIO_SUPPORT_M4A_DECODER) ||   
-//         (CONFIG_AUDIO_SUPPORT_TS_DECODER) ||    
-//         (CONFIG_AUDIO_SUPPORT_MP4_DECODER))
-//     ESP_LOGI(TAG, "[3.3] Create aac decoder");
-//     aac_decoder_cfg_t  aac_dec_cfg  = DEFAULT_AAC_DECODER_CONFIG();
-//     music_decoder = aac_decoder_init(&aac_dec_cfg);
-// #endif
-
     ESP_LOGI(TAG, "[3.4] Register all elements to audio pipeline");
     audio_pipeline_register(pipeline, fatfs_stream_reader, "file");
     audio_pipeline_register(pipeline, music_decoder, "dec");
@@ -459,41 +271,6 @@ void send_to_speaker(void){
     audio_pipeline_link(pipeline, &link_tag[0], 3);
     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/rec.wav");
     audio_element_set_uri(fatfs_stream_reader, "/sdcard/rec.wav");
-
-// #ifdef CONFIG_AUDIO_SUPPORT_MP3_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.mp3 ");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.mp3");
-// #elif CONFIG_AUDIO_SUPPORT_AMRNB_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /test.amr");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.amr");
-// #elif CONFIG_AUDIO_SUPPORT_AMRWB_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.Wamr");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.Wamr");
-// #elif CONFIG_AUDIO_SUPPORT_OPUS_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.opus");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.opus");
-// #elif CONFIG_AUDIO_SUPPORT_OGG_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.ogg");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.ogg");
-// #elif CONFIG_AUDIO_SUPPORT_FLAC_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.flac");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.flac");
-// #elif CONFIG_AUDIO_SUPPORT_WAV_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.wav");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.wav");
-// #elif CONFIG_AUDIO_SUPPORT_AAC_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.aac");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.aac");
-// #elif CONFIG_AUDIO_SUPPORT_M4A_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.m4a");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.m4a");
-// #elif CONFIG_AUDIO_SUPPORT_TS_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.ts");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.ts");
-// #elif CONFIG_AUDIO_SUPPORT_MP4_DECODER
-//     ESP_LOGI(TAG, "[3.6] Set up uri: /sdcard/test.mp4");
-//     audio_element_set_uri(fatfs_stream_reader, "/sdcard/test.mp4");
-// #endif
 
     ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
     audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
