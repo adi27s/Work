@@ -32,4 +32,5 @@
   git commit -m "changes in api - MattojsonArray"
   git push origin face_recog
 
-  
+7. Add upstream/origin
+  git remote add upstream <link>
