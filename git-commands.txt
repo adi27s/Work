@@ -34,3 +34,6 @@
 
 7. Add upstream/origin
   git remote add upstream <link>
+
+8. Create and Track a Local Branch from a Remote Branch
+  git checkout -b <local-branch> origin/<remote-branch>
